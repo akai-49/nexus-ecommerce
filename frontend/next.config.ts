@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",   // Required for Railway deployment
+  // Vercel handles Next.js deployment natively, no special output needed
 };
 
 export default nextConfig;
