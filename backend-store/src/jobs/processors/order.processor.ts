@@ -43,7 +43,7 @@ export class OrderProcessor extends WorkerHost {
 
     console.log(`[BullMQ Worker] 1. Generating PDF Invoice for Order ${order.orderNumber}...`);
     // Simulate PDF invoice write
-    const invoiceUrl = `http://localhost:5000/invoices/INV_${order.orderNumber}.pdf`;
+    const invoiceUrl = `http://localhost:5001/invoices/INV_${order.orderNumber}.pdf`;
     
     console.log(`[BullMQ Worker] 2. Dispatching Confirmation Email to ${email}...`);
     console.log(`[BullMQ Worker] 3. Notifying Admin CMS about Order ${order.orderNumber} ($${order.total})...`);

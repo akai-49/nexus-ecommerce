@@ -6,7 +6,7 @@ import { Star, ShieldAlert, ShoppingBag, Truck, BadgePercent } from 'lucide-reac
 import { useCartStore } from '@/store/useCartStore';
 import axios from 'axios';
 
-const STORE_API_URL = process.env.NEXT_PUBLIC_STORE_API_URL || 'http://localhost:5000';
+const STORE_API_URL = process.env.NEXT_PUBLIC_STORE_API_URL || 'http://localhost:5001';
 
 export default function ProductDetailsPage() {
   const { slug } = useParams();

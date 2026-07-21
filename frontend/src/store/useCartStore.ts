@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useAuthStore } from './useAuthStore';
 
 // Determine backend endpoints
-const STORE_API_URL = process.env.NEXT_PUBLIC_STORE_API_URL || 'http://localhost:5000';
+const STORE_API_URL = process.env.NEXT_PUBLIC_STORE_API_URL || 'http://localhost:5001';
 
 interface CartItem {
   id: string;

@@ -6,7 +6,7 @@ import { Package, Truck, ArrowLeft, RefreshCw, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 
-const STORE_API_URL = process.env.NEXT_PUBLIC_STORE_API_URL || 'http://localhost:5000';
+const STORE_API_URL = process.env.NEXT_PUBLIC_STORE_API_URL || 'http://localhost:5001';
 
 export default function UserOrdersPage() {
   const token = useAuthStore((state) => state.token);

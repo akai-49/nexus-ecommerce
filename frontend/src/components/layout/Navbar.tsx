@@ -8,7 +8,7 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { ShoppingBag, Search, Sun, Moon, User, X, ChevronDown } from 'lucide-react';
 import axios from 'axios';
 
-const STORE_API_URL = process.env.NEXT_PUBLIC_STORE_API_URL || 'http://localhost:5000';
+const STORE_API_URL = process.env.NEXT_PUBLIC_STORE_API_URL || 'http://localhost:5001';
 
 export default function Navbar() {
   const router = useRouter();

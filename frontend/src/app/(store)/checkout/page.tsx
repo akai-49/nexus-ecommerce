@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { ShieldCheck, Receipt, Truck } from 'lucide-react';
 import axios from 'axios';
 
-const STORE_API_URL = process.env.NEXT_PUBLIC_STORE_API_URL || 'http://localhost:5000';
+const STORE_API_URL = process.env.NEXT_PUBLIC_STORE_API_URL || 'http://localhost:5001';
 
 export default function CheckoutPage() {
   const { items, subtotal, fetchCart } = useCartStore();

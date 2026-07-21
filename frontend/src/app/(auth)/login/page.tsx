@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { ShieldCheck, Mail, Lock } from 'lucide-react';
 import axios from 'axios';
 
-const STORE_API_URL = process.env.NEXT_PUBLIC_STORE_API_URL || 'http://localhost:5000';
+const STORE_API_URL = process.env.NEXT_PUBLIC_STORE_API_URL || 'http://localhost:5001';
 
 export default function LoginPage() {
   const router = useRouter();

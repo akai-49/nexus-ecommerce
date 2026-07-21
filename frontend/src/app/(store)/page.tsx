@@ -6,7 +6,7 @@ import { ArrowRight, ShieldCheck, Truck, RotateCcw, CreditCard } from 'lucide-re
 import ProductCard from '@/components/ui/ProductCard';
 import axios from 'axios';
 
-const STORE_API_URL = process.env.NEXT_PUBLIC_STORE_API_URL || 'http://localhost:5000';
+const STORE_API_URL = process.env.NEXT_PUBLIC_STORE_API_URL || 'http://localhost:5001';
 
 export default function Home() {
   const [products, setProducts] = useState<any[]>([]);
