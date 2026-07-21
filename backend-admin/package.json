@@ -9,7 +9,7 @@
     "node": ">=20.18.0"
   },
   "scripts": {
-    "build": "nest build && npx tsc prisma/seed.ts --outDir dist/prisma --target es2023 --module commonjs --moduleResolution node",
+    "build": "nest build && npx tsc prisma/seed.ts --outDir dist/prisma --target es2023 --module commonjs --moduleResolution node --skipLibCheck",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
