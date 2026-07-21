@@ -84,11 +84,11 @@ export class ProductsController {
   @Get()
   @ApiOperation({ summary: 'Get paginated list of products' })
   getProducts(
-    @Query('page', ParseIntPipe) page = 1,
-    @Query('limit', ParseIntPipe) limit = 10,
+    @Query('page', new ParseIntPipe({ optional: true })) page = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit = 10,
     @Query('search') search?: string,
   ) {
-    return this.productsService.getProducts(page, limit, search);
+    return this.productsService.getProducts(page || 1, limit || 10, search);
   }
 
   @Get(':id')

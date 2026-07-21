@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import Link from 'next/link';
-import { Plus, Upload, Download, Trash, Eye, Sparkles } from 'lucide-react';
+import { Plus, Upload, Download, Eye, Sparkles, Image as ImageIcon } from 'lucide-react';
 import axios from 'axios';
 
 const ADMIN_API_URL = process.env.NEXT_PUBLIC_ADMIN_API_URL || 'http://localhost:4000';
@@ -25,26 +25,39 @@ export default function AdminProductsPage() {
   const [brandId, setBrandId] = useState('');
   const [basePrice, setBasePrice] = useState('');
   const [sku, setSku] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
   const [categories, setCategories] = useState<any[]>([]);
   const [brands, setBrands] = useState<any[]>([]);
 
-  const fetchProductsAndMetadata = () => {
+  const fetchProductsAndMetadata = async () => {
     if (!token) return;
     setLoading(true);
-    
-    // Fetch products, categories, brands
-    Promise.all([
-      axios.get(`${ADMIN_API_URL}/products?limit=50`, { headers: { Authorization: `Bearer ${token}` } }),
-      axios.get(`${ADMIN_API_URL}/products/categories`, { headers: { Authorization: `Bearer ${token}` } }),
-      axios.get(`${ADMIN_API_URL}/products/brands`, { headers: { Authorization: `Bearer ${token}` } }),
-    ])
-      .then(([prodRes, catRes, brandRes]) => {
-        setProducts(prodRes.data?.items || []);
-        setCategories(catRes.data || []);
-        setBrands(brandRes.data || []);
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+    const headers = { Authorization: `Bearer ${token}` };
+
+    try {
+      const [prodRes, catRes, brandRes] = await Promise.allSettled([
+        axios.get(`${ADMIN_API_URL}/products?page=1&limit=50`, { headers }),
+        axios.get(`${ADMIN_API_URL}/products/categories`, { headers }),
+        axios.get(`${ADMIN_API_URL}/products/brands`, { headers }),
+      ]);
+
+      if (prodRes.status === 'fulfilled' && prodRes.value.data) {
+        setProducts(prodRes.value.data.items || []);
+      }
+      if (catRes.status === 'fulfilled' && catRes.value.data) {
+        setCategories(catRes.value.data || []);
+      }
+      if (brandRes.status === 'fulfilled' && brandRes.value.data) {
+        setBrands(brandRes.value.data || []);
+      }
+    } catch (err) {
+      console.error('Error fetching data:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -79,24 +92,67 @@ export default function AdminProductsPage() {
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !categoryId || !brandId || !basePrice || !sku) {
-      alert('Please fill out all fields');
+      alert('Please fill out all required fields');
       return;
     }
 
     try {
-      await axios.post(
+      let finalImageUrl = imageUrl;
+
+      // 1. Upload Image file if provided
+      if (imageFile) {
+        setUploadingImage(true);
+        const mediaFormData = new FormData();
+        mediaFormData.append('file', imageFile);
+        try {
+          const mediaRes = await axios.post(`${ADMIN_API_URL}/media/upload`, mediaFormData, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+          finalImageUrl = mediaRes.data?.url || finalImageUrl;
+        } catch (uploadErr) {
+          console.warn('Image upload failed, proceeding without media:', uploadErr);
+        } finally {
+          setUploadingImage(false);
+        }
+      }
+
+      // Generate slug from name
+      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `prod-${Date.now()}`;
+
+      // 2. Create Base Product
+      const prodRes = await axios.post(
         `${ADMIN_API_URL}/products`,
         {
           name,
-          description,
+          slug,
+          description: description || name,
           categoryId,
           brandId,
           basePrice: Number(basePrice),
-          sku,
+          status: 'PUBLISHED',
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert('Product created successfully!');
+
+      const createdProduct = prodRes.data;
+
+      // 3. Create default Variant with SKU and Image
+      if (createdProduct?.id) {
+        await axios.post(
+          `${ADMIN_API_URL}/products/${createdProduct.id}/variants`,
+          {
+            sku,
+            price: Number(basePrice),
+            images: finalImageUrl ? [finalImageUrl] : [],
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        ).catch((err) => console.warn('Variant creation warning:', err));
+      }
+
+      alert('Product and Variant created successfully!');
       setShowAddModal(false);
       setName('');
       setDescription('');
@@ -104,6 +160,8 @@ export default function AdminProductsPage() {
       setBrandId('');
       setBasePrice('');
       setSku('');
+      setImageUrl('');
+      setImageFile(null);
       fetchProductsAndMetadata();
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to create product');
@@ -201,10 +259,10 @@ export default function AdminProductsPage() {
               <tbody className="divide-y">
                 {products.map((prod) => (
                   <tr key={prod.id} className="hover:bg-secondary/10 transition-colors">
-                    <td className="p-4 font-mono text-xs">{prod.sku}</td>
+                    <td className="p-4 font-mono text-xs">{prod.variants?.[0]?.sku || 'N/A'}</td>
                     <td className="p-4 font-bold">{prod.name}</td>
-                    <td className="p-4">{prod.category?.name}</td>
-                    <td className="p-4">{prod.brand?.name}</td>
+                    <td className="p-4">{prod.category?.name || 'N/A'}</td>
+                    <td className="p-4">{prod.brand?.name || 'N/A'}</td>
                     <td className="p-4 font-semibold text-primary">${Number(prod.basePrice).toFixed(2)}</td>
                     <td className="p-4 text-center">{prod.variants?.length || 0}</td>
                     <td className="p-4 flex gap-2 justify-center">
@@ -227,11 +285,11 @@ export default function AdminProductsPage() {
       {/* Add Product Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 bg-background/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-card border rounded-xl p-8 shadow-lg max-w-lg w-full flex flex-col gap-6">
+          <div className="bg-card border rounded-xl p-8 shadow-lg max-w-lg w-full flex flex-col gap-6 max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-bold">Add Product</h3>
             <form onSubmit={handleAddProduct} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-2 sm:col-span-2">
-                <label className="text-xs font-semibold">Product Name</label>
+                <label className="text-xs font-semibold">Product Name *</label>
                 <input 
                   type="text" 
                   required
@@ -253,7 +311,7 @@ export default function AdminProductsPage() {
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold">Category</label>
+                <label className="text-xs font-semibold">Category *</label>
                 <select 
                   required
                   value={categoryId}
@@ -268,7 +326,7 @@ export default function AdminProductsPage() {
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold">Brand</label>
+                <label className="text-xs font-semibold">Brand *</label>
                 <select 
                   required
                   value={brandId}
@@ -283,9 +341,10 @@ export default function AdminProductsPage() {
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold">Base Price</label>
+                <label className="text-xs font-semibold">Base Price ($) *</label>
                 <input 
                   type="number" 
+                  step="0.01"
                   required
                   placeholder="99.99"
                   value={basePrice}
@@ -295,7 +354,7 @@ export default function AdminProductsPage() {
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold">Base SKU / Code</label>
+                <label className="text-xs font-semibold">Base SKU / Code *</label>
                 <input 
                   type="text" 
                   required
@@ -304,6 +363,34 @@ export default function AdminProductsPage() {
                   onChange={(e) => setSku(e.target.value)}
                   className="rounded border p-2 bg-background text-sm"
                 />
+              </div>
+
+              {/* Media Upload & URL Section */}
+              <div className="flex flex-col gap-2 sm:col-span-2 border-t pt-4 mt-2">
+                <label className="text-xs font-semibold flex items-center gap-1.5">
+                  <ImageIcon className="h-4 w-4 text-primary" /> Product Image (Media Upload or URL)
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <span className="text-[11px] text-muted-foreground block mb-1">Upload File</span>
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                      className="rounded border p-1.5 bg-background text-xs cursor-pointer w-full"
+                    />
+                  </div>
+                  <div>
+                    <span className="text-[11px] text-muted-foreground block mb-1">Or Image URL</span>
+                    <input 
+                      type="url" 
+                      placeholder="https://images.unsplash.com/photo..."
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      className="rounded border p-2 bg-background text-xs w-full"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="flex gap-3 justify-end sm:col-span-2 text-xs mt-4">
@@ -316,9 +403,10 @@ export default function AdminProductsPage() {
                 </button>
                 <button
                   type="submit"
-                  className="rounded bg-primary text-white px-4 py-2 hover:bg-blue-600 font-bold"
+                  disabled={uploadingImage}
+                  className="rounded bg-primary text-white px-4 py-2 hover:bg-blue-600 font-bold disabled:opacity-50"
                 >
-                  Create Product
+                  {uploadingImage ? 'Uploading image...' : 'Create Product'}
                 </button>
               </div>
             </form>
