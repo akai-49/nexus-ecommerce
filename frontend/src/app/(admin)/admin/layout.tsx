@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
-import { LayoutDashboard, ShoppingCart, Users, Settings, LogOut, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Users, LogOut, ShieldAlert } from 'lucide-react';
 
 export default function AdminLayout({
   children,
@@ -14,6 +14,11 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   const { user, clearAuth } = useAuthStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = () => {
     clearAuth();
@@ -25,8 +30,17 @@ export default function AdminLayout({
     return <>{children}</>;
   }
 
+  // Prevent SSR hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-slate-950 text-white">
+        <div className="animate-pulse font-bold text-slate-400">Loading Admin Gateway...</div>
+      </div>
+    );
+  }
+
   // Check roles: must be admin to view CMS pages
-  const isAdmin = user?.roles?.some(role => ['SUPER_ADMIN', 'PRODUCT_MANAGER', 'ORDER_MANAGER'].includes(role));
+  const isAdmin = user?.roles?.some((role: string) => ['SUPER_ADMIN', 'PRODUCT_MANAGER', 'ORDER_MANAGER'].includes(role));
 
   if (!user || !isAdmin) {
     return (

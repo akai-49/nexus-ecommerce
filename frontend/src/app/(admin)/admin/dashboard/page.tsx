@@ -17,7 +17,7 @@ export default function AdminDashboardPage() {
     if (!token) return;
     setLoading(true);
     axios
-      .get(`${ADMIN_API_URL}/analytics`, {
+      .get(`${ADMIN_API_URL}/analytics/dashboard`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
