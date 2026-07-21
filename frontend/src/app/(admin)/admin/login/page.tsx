@@ -31,8 +31,8 @@ export default function AdminLoginPage() {
       const { accessToken, refreshToken, user } = res.data;
 
       // Check if user has permission to log in to Admin panel
-      const isAdmin = user.roles.some((r: any) =>
-        ['SUPER_ADMIN', 'PRODUCT_MANAGER', 'ORDER_MANAGER'].includes(r.role.name)
+      const isAdmin = user.roles.some((role: string) =>
+        ['SUPER_ADMIN', 'PRODUCT_MANAGER', 'ORDER_MANAGER'].includes(role)
       );
 
       if (!isAdmin) {
@@ -43,7 +43,7 @@ export default function AdminLoginPage() {
       const mappedUser = {
         id: user.id,
         email: user.email,
-        roles: user.roles.map((r: any) => r.role.name),
+        roles: user.roles,
       };
 
       setAuth(accessToken, refreshToken, mappedUser);
