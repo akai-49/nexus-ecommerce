@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional, IsNumber, IsEnum, IsArray, IsJSON } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ProductStatus } from '../../../../shared/constants';
+import { ProductStatus } from '../../common/constants';
 
 export class CreateProductDto {
   @ApiProperty({ example: 'iPhone 15' })
