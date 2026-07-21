@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional, IsEnum, IsJSON, IsEmail } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { PaymentMethod } from '@catalog/shared/constants';
+import { PaymentMethod } from '../../common/constants';
 
 export class CreateCheckoutDto {
   @ApiProperty({ example: 'STRIPE' })

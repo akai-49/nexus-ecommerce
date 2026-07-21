@@ -4,7 +4,7 @@ import { RazorpayProvider } from './providers/razorpay.provider';
 import { PayPalProvider } from './providers/paypal.provider';
 import { CodProvider } from './providers/cod.provider';
 import { IPaymentGateway } from './payment-gateway.interface';
-import { PaymentMethod } from '@catalog/shared/constants';
+import { PaymentMethod } from '../common/constants';
 
 @Injectable()
 export class PaymentFactory {

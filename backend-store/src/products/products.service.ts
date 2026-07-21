@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
-import { ProductStatus } from '@catalog/shared/constants';
+import { ProductStatus } from '../common/constants';
 
 @Injectable()
 export class ProductsService {

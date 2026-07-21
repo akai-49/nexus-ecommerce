@@ -5,7 +5,7 @@ import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiBearerAuth } from '@nes
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { Roles as RoleEnum } from '@catalog/shared/constants';
+import { Roles as RoleEnum } from '../common/constants';
 import type { Response } from 'express';
 
 @ApiTags('Bulk Actions CMS')

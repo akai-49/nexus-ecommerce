@@ -6,7 +6,7 @@ import { RedisService } from '../redis/redis.service';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { Roles } from '@catalog/shared/constants';
+import { Roles } from '../common/constants';
 
 @Injectable()
 export class AuthService {

@@ -5,7 +5,7 @@ import { PaymentFactory } from '../payments/payment.factory';
 import { ShippingFactory } from '../shipping/shipping.factory';
 import { CreateCheckoutDto, VerifyPaymentDto } from './dto/checkout.dto';
 import { RedisService } from '../redis/redis.service';
-import { OrderStatus, PaymentStatus, DiscountType } from '@catalog/shared/constants';
+import { OrderStatus, PaymentStatus, DiscountType } from '../common/constants';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 
