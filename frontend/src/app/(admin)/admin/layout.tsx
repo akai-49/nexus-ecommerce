@@ -30,17 +30,19 @@ export default function AdminLayout({
     return <>{children}</>;
   }
 
-  // Prevent SSR hydration mismatch
+  // Prevent SSR hydration mismatch and ensure children are rendered during SSR
   if (!mounted) {
     return (
-      <div className="flex h-screen items-center justify-center bg-slate-950 text-white">
-        <div className="animate-pulse font-bold text-slate-400">Loading Admin Gateway...</div>
+      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-8">
+        {children}
       </div>
     );
   }
 
   // Check roles: must be admin to view CMS pages
-  const isAdmin = user?.roles?.some((role: string) => ['SUPER_ADMIN', 'PRODUCT_MANAGER', 'ORDER_MANAGER'].includes(role));
+  const isAdmin = user?.roles?.some((role: string) =>
+    ['SUPER_ADMIN', 'PRODUCT_MANAGER', 'ORDER_MANAGER'].includes(role)
+  );
 
   if (!user || !isAdmin) {
     return (
@@ -50,7 +52,7 @@ export default function AdminLayout({
         <p className="text-sm text-slate-400 text-center max-w-md">
           This portal is reserved for authorized administrative staff. Please sign in with an admin account.
         </p>
-        <Link 
+        <Link
           href="/admin/login"
           className="rounded bg-primary px-6 py-2 text-sm font-semibold text-white hover:bg-blue-600 transition-colors"
         >
@@ -68,7 +70,6 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen flex bg-slate-50 dark:bg-slate-950">
-      
       {/* Sidebar */}
       <aside className="w-64 bg-slate-900 text-white flex flex-col justify-between flex-shrink-0">
         <div className="flex flex-col">
@@ -101,7 +102,7 @@ export default function AdminLayout({
             <span className="text-xs text-slate-400">Signed in as</span>
             <span className="text-sm font-bold truncate max-w-[120px]">{user.email}</span>
           </div>
-          <button 
+          <button
             onClick={handleLogout}
             className="text-slate-400 hover:text-red-500 transition-colors p-2"
           >
@@ -119,11 +120,8 @@ export default function AdminLayout({
           </div>
         </header>
 
-        <main className="flex-grow p-8 overflow-y-auto">
-          {children}
-        </main>
+        <main className="flex-grow p-8 overflow-y-auto">{children}</main>
       </div>
-
     </div>
   );
 }
