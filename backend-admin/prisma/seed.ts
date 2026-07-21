@@ -97,6 +97,7 @@ async function main() {
     update: {},
     create: {
       name: 'Apple',
+      slug: 'apple',
       description: 'Premium personal computing devices',
     },
   });
@@ -106,6 +107,7 @@ async function main() {
     update: {},
     create: {
       name: 'Nike',
+      slug: 'nike',
       description: 'Athletic footwear and apparel',
     },
   });
@@ -113,18 +115,17 @@ async function main() {
   console.log('Metadata Categories & Brands seeded.');
 
   // 4. Seed a Sample Product with Variant and Inventory
-  const sampleProductSku = 'APL-IP15-01';
-  const existingProduct = await prisma.product.findFirst({
-    where: { sku: sampleProductSku },
+  const sampleProductSlug = 'iphone-15-pro-max';
+  const existingProduct = await prisma.product.findUnique({
+    where: { slug: sampleProductSlug },
   });
 
   if (!existingProduct) {
     const product = await prisma.product.create({
       data: {
         name: 'iPhone 15 Pro Max',
-        slug: 'iphone-15-pro-max',
+        slug: sampleProductSlug,
         description: 'Titanium design, powerful A17 Pro chip, customisable Action button, and a powerful camera.',
-        sku: sampleProductSku,
         basePrice: 1199.99,
         categoryId: category1.id,
         brandId: brand1.id,
@@ -138,7 +139,6 @@ async function main() {
         productId: product.id,
         sku: 'APL-IP15-BLK-256',
         price: 1199.99,
-        stock: 50,
         color: 'Black Titanium',
         size: '256GB',
         isActive: true,
@@ -150,8 +150,6 @@ async function main() {
       data: {
         name: 'Primary NY Warehouse',
         code: 'WH-NY-01',
-        city: 'New York',
-        postalCode: '10001',
         isActive: true,
       },
     });
