@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/store/useCartStore';
 import { useAuthStore } from '@/store/useAuthStore';
-import { ShoppingBag, Search, Sun, Moon, User, X, ChevronDown } from 'lucide-react';
+import { ShoppingBag, Search, Sun, Moon, User, X, ChevronDown, LogIn, LogOut, Package, Shield, UserPlus } from 'lucide-react';
 import axios from 'axios';
 
 const STORE_API_URL = process.env.NEXT_PUBLIC_STORE_API_URL || 'http://localhost:5001';
@@ -20,6 +20,7 @@ export default function Navbar() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
   // Load theme preference
   useEffect(() => {
@@ -72,7 +73,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md glass">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-md glass">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo */}
           <div className="flex items-center gap-8">
@@ -114,11 +115,12 @@ export default function Navbar() {
           </div>
 
           {/* Action Icons */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {/* Search Toggle */}
             <button 
               onClick={() => setSearchOpen(true)}
               className="rounded-full p-2 hover:bg-secondary transition-colors"
+              title="Search products"
             >
               <Search className="h-5 w-5" />
             </button>
@@ -127,12 +129,13 @@ export default function Navbar() {
             <button 
               onClick={toggleDarkMode}
               className="rounded-full p-2 hover:bg-secondary transition-colors"
+              title="Toggle theme"
             >
               {darkMode ? <Sun className="h-5 w-5 text-yellow-500" /> : <Moon className="h-5 w-5 text-slate-700" />}
             </button>
 
             {/* Cart Icon */}
-            <Link href="/cart" className="relative rounded-full p-2 hover:bg-secondary transition-colors">
+            <Link href="/cart" className="relative rounded-full p-2 hover:bg-secondary transition-colors mr-1" title="View Cart">
               <ShoppingBag className="h-5 w-5" />
               {cartQty > 0 && (
                 <span className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
@@ -141,23 +144,89 @@ export default function Navbar() {
               )}
             </Link>
 
-            {/* Profile Menu */}
+            {/* User Profile / Auth Menu */}
             {user ? (
-              <div className="flex items-center gap-2">
-                <Link href="/orders" className="text-sm font-medium hover:text-primary transition-colors hidden sm:block">
-                  My Orders
-                </Link>
-                <button 
-                  onClick={clearAuth}
-                  className="text-xs font-semibold text-destructive hover:underline"
+              <div className="relative">
+                <button
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium hover:bg-secondary transition-colors shadow-sm"
                 >
-                  Logout
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white uppercase">
+                    {user.email ? user.email.charAt(0) : 'U'}
+                  </div>
+                  <span className="hidden sm:inline-block max-w-[100px] truncate text-xs font-semibold">
+                    {user.email?.split('@')[0]}
+                  </span>
+                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
+
+                {/* Profile Dropdown */}
+                {userDropdownOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setUserDropdownOpen(false)} 
+                    />
+                    <div className="absolute right-0 top-10 z-50 mt-2 w-56 rounded-xl border bg-card p-3 shadow-xl space-y-2">
+                      <div className="px-2 py-1.5 border-b pb-2">
+                        <p className="text-xs font-bold truncate text-foreground">{user.email}</p>
+                        <span className="inline-block mt-1 text-[10px] font-semibold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                          {user.roles?.includes('ADMIN') ? 'Administrator' : 'Customer'}
+                        </span>
+                      </div>
+                      <div className="space-y-1">
+                        <Link
+                          href="/orders"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium hover:bg-secondary transition-colors text-foreground"
+                        >
+                          <Package className="h-4 w-4 text-primary" />
+                          My Orders
+                        </Link>
+                        {user.roles?.includes('ADMIN') && (
+                          <Link
+                            href="/admin/dashboard"
+                            onClick={() => setUserDropdownOpen(false)}
+                            className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium hover:bg-secondary transition-colors text-foreground"
+                          >
+                            <Shield className="h-4 w-4 text-purple-600" />
+                            Admin Portal
+                          </Link>
+                        )}
+                      </div>
+                      <div className="border-t pt-1">
+                        <button
+                          onClick={() => {
+                            clearAuth();
+                            setUserDropdownOpen(false);
+                          }}
+                          className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-semibold text-destructive hover:bg-destructive/10 transition-colors"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             ) : (
-              <Link href="/login" className="rounded-full p-2 hover:bg-secondary transition-colors">
-                <User className="h-5 w-5" />
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/login"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-blue-600 transition-colors shadow-sm"
+                >
+                  <LogIn className="h-4 w-4" />
+                  <span>Sign In</span>
+                </Link>
+                <Link
+                  href="/register"
+                  className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-border px-3.5 py-2 text-xs font-semibold hover:bg-secondary transition-colors"
+                >
+                  <UserPlus className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span>Register</span>
+                </Link>
+              </div>
             )}
           </div>
         </div>
